@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcador de Tarefas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #151515;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #222;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ffcc; /* Ciano neon */
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+
+        .input-area {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 6px 0 0 6px;
+            font-size: 18px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            text-shadow: 0 0 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .adicionar-button {
+            background-color: #00bfff; /* Azul neon */
+            text-shadow: 0 0 8px #00bfff;
+            box-shadow: 0 0 5px rgba(0, 191, 255, 0.7);
+        }
+
+        .adicionar-button:hover {
+            background-color: #0080ff; /* Tom mais escuro de azul */
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.9);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        .task-name {
+            flex-grow: 1;
+            margin-right: 15px;
+            font-size: 18px;
+            color: #eee;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        .actions button {
+            color: #fff;
+            margin-left: 8px;
+            border-radius: 6px;
+            padding: 8px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            text-shadow: 0 0 6px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .concluida-button {
+            background-color: #00ff7f; /* Verde neon */
+            text-shadow: 0 0 6px #00ff7f;
+            box-shadow: 0 0 5px rgba(0, 255, 127, 0.5);
+        }
+
+        .concluida-button:hover {
+            background-color: #00cc66; /* Tom mais escuro de verde */
+            box-shadow: 0 0 12px rgba(0, 255, 127, 0.7);
+        }
+
+        .excluir-button {
+            background-color: #ff0000; /* Vermelho neon */
+            text-shadow: 0 0 6px #ff0000;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+        }
+
+        .excluir-button:hover {
+            background-color: #cc0000; /* Tom mais escuro de vermelho */
+            box-shadow: 0 0 12px rgba(255, 0, 0, 0.9);
+        }
+
+        .concluida .concluida-button {
+            background-color: #555 !important; /* Cor cinza para botão desativado */
+            color: #888 !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+            cursor: default !important;
+        }
+
+        .concluida .concluida-button:hover {
+            background-color: #555 !important;
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Tarefas</h1>
+        <div class="input-area">
+            <input type="text" id="novaTarefa" placeholder="Adicionar nova tarefa">
+            <button class="adicionar-button" onclick="adicionarTarefa()">Adicionar</button>
+        </div>
+        <ul id="listaDeTarefas">
+        </ul>
+    </div>
+
+    <script>
+        const inputNovaTarefa = document.getElementById('novaTarefa');
+        const listaDeTarefas = document.getElementById('listaDeTarefas');
+
+        function adicionarTarefa() {
+            const nomeDaTarefa = inputNovaTarefa.value.trim();
+            if (nomeDaTarefa) {
+                const novaLi = criarTarefaElemento(nomeDaTarefa, false);
+                listaDeTarefas.appendChild(novaLi);
+                inputNovaTarefa.value = '';
+                ordenarTarefas();
+                salvarTarefas();
+            }
+        }
+
+        function criarTarefaElemento(nome, concluida) {
+            const novaLi = document.createElement('li');
+            if (concluida) {
+                novaLi.classList.add('concluida');
+            }
+            novaLi.innerHTML = `
+                <span class="task-name ${concluida ? 'completed' : ''}">${nome}</span>
+                <div class="actions">
+                    <button class="concluida-button" onclick="marcarConcluida(this)" ${concluida ? 'disabled' : ''}>Concluída</button>
+                    <button class="excluir-button" onclick="excluirTarefa(this)">Excluir</button>
+                </div>
+            `;
+            return novaLi;
+        }
+
+        function marcarConcluida(botao) {
+            const listItem = botao.parentNode.parentNode;
+            const tarefaNome = listItem.querySelector('.task-name');
+            listItem.classList.add('concluida');
+            tarefaNome.classList.add('completed');
+            const botaoConcluir = listItem.querySelector('.concluida-button');
+            botaoConcluir.disabled = true;
+            ordenarTarefas();
+            salvarTarefas();
+        }
+
+        function excluirTarefa(botao) {
+            const listItem = botao.parentNode.parentNode;
+            listaDeTarefas.removeChild(listItem);
+            salvarTarefas();
+        }
+
+        function ordenarTarefas() {
+            const tarefas = Array.from(listaDeTarefas.children);
+            const tarefasConcluidas = tarefas.filter(li => li.classList.contains('concluida'));
+            const tarefasPendentes = tarefas.filter(li => !li.classList.contains('concluida'));
+
+            listaDeTarefas.innerHTML = ''; // Limpa a lista
+            tarefasPendentes.forEach(li => listaDeTarefas.appendChild(li));
+            tarefasConcluidas.forEach(li => listaDeTarefas.appendChild(li));
+        }
+
+        function salvarTarefas() {
+            const tarefas = [];
+            document.querySelectorAll('#listaDeTarefas li').forEach(li => {
+                tarefas.push({
+                    nome: li.querySelector('.task-name').textContent,
+                    concluida: li.querySelector('.task-name').classList.contains('completed')
+                });
+            });
+            localStorage.setItem('tarefas', JSON.stringify(tarefas));
+        }
+
+        function carregarTarefas() {
+            const tarefasSalvas = localStorage.getItem('tarefas');
+            if (tarefasSalvas) {
+                const tarefas = JSON.parse(tarefasSalvas);
+                tarefas.forEach(tarefa => {
+                    const novaLi = criarTarefaElemento(tarefa.nome, tarefa.concluida);
+                    listaDeTarefas.appendChild(novaLi);
+                });
+                ordenarTarefas(); // Ordena após carregar
+            }
+        }
+
+        carregarTarefas();
+    </script>
+</body>
+</html>
